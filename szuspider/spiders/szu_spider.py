@@ -1,4 +1,5 @@
 import scrapy
+import json
 
 class SzuSpider(scrapy.Spider):
     name = "szu"
@@ -13,7 +14,7 @@ class SzuSpider(scrapy.Spider):
 
     def parse(self, response):
         page = response.url.split("/")[-2]
-        filename = self.download_path + 'szu-%s.html' % page
+        filename = self.download_path + 'html/%s.html' % page
         with open(filename, 'wb') as f:
             f.write(response.body)
         self.log('Saved file %s' % filename)
@@ -29,16 +30,43 @@ class SzuSpider(scrapy.Spider):
 
      
     def parse_news(self, response):
-         page = response.url.split("/")[-1]
-         id = int(page.split('=')[1])
-         filename = self.download_path + 'szu-news-%s.html' % id
-         with open(filename, 'wb') as f:
-             f.write(response.body)
-         self.log('Saved file %s' % filename)
+        page = response.url.split("/")[-1]
+        id = int(page.split('=')[1])
+        html_file_name = self.download_path + 'html/%s.html' % id
+        with open(html_file_name, 'wb') as f:
+            f.write(response.body)
+        self.log('Saved html file %s' % html_file_name)
 
-        #for one in response.css('td.fontcolor3'):
-        #    if one.css('font::attr(size)').extract_first() == 4:
-        #        yield {
+        save_data = {} 
+        save_data['id'] = id
+        save_data['title'] = response.css("b font[size='4']").extract_first()
+        save_data['content'] = response.css("table[width='85%']").extract_first()
+        #print(save_data)
+        json_file_name = self.download_path + 'json/%s.json' % id
+        self.EncodingJson(json_file_name, save_data)
+        self.log('Saved json file %s' % json_file_name)
 
-        #            'title': one.css('font::text').extract_first(),
-        #        }
+    @staticmethod
+    def DecodingJson(json_file):
+        dic = {}
+        jfile = open(json_file)
+
+        while True:
+            line = jfile.readline()
+            if len(line) == 0:
+                break
+            decode_file = json.loads(line)
+            for key, value in decode_file.items():
+                dic[key] = value
+
+        jfile.close()
+        return dic 
+    
+    @staticmethod
+    def EncodingJson(file_name, data):
+        out_json_file = open(file_name,"w")
+        json_data = json.dumps(data, sort_keys = True) 
+        out_json_file.truncate()
+        out_json_file.write(json_data)
+        out_json_file.close()
+
