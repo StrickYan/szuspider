@@ -1,5 +1,7 @@
 import scrapy
 import json
+import mysql.connector
+import time
 
 class SzuSpider(scrapy.Spider):
     name = "szu"
@@ -37,14 +39,26 @@ class SzuSpider(scrapy.Spider):
             f.write(response.body)
         self.log('Saved html file %s' % html_file_name)
 
+        #根据html规则拆取数据
         save_data = {} 
         save_data['id'] = id
-        save_data['title'] = response.css("b font[size='4']").extract_first()
+        save_data['title'] = response.css("b font[size='4']::text").extract_first().replace("\u3000","")
+        if save_data['title'] is None or save_data['title'] == '':
+            save_data['title'] = response.css("b font[size='4'] b::text").extract_first()
+        if save_data['title'] is None or save_data['title'] == '':
+            save_data['title'] = response.css("b font[size='4'] font::text").extract_first()
+        if save_data['title'] is None or save_data['title'] == '':
+            save_data['title'] = response.css("b font[size='4'] b font::text").extract_first()
         save_data['content'] = response.css("table[width='85%']").extract_first()
-        #print(save_data)
+        temp = response.css("td[height='30'] font[color='#808080']::text").extract_first() #from 和 date 行
+        save_data['from'] = temp.split('\u3000')[0] #拆分temp,得到from,date
+        save_data['date'] = temp.split('\u3000')[1]
+
         json_file_name = self.download_path + 'json/%s.json' % id
-        self.EncodingJson(json_file_name, save_data)
+        self.EncodingJson(json_file_name, save_data) #转换为json格式保存本地文件
         self.log('Saved json file %s' % json_file_name)
+
+        self.szu_news_to_db(save_data) #数据入库
 
     @staticmethod
     def DecodingJson(json_file):
@@ -69,4 +83,22 @@ class SzuSpider(scrapy.Spider):
         out_json_file.truncate()
         out_json_file.write(json_data)
         out_json_file.close()
+
+    @staticmethod
+    def szu_news_to_db(data):
+        conn = mysql.connector.connect(user='root', password='mct10324', database='search_engine')
+        cursor = conn.cursor()
+        sql = "select count(*) from `szu_news` where `view_id` = %s"
+        cursor.execute(sql, (data['id'],))
+        ret = cursor.fetchone()
+        #print(ret[0])
+        if ret[0] == 0:   
+            sql = "insert into `szu_news` (`view_id`, `title`, `content`, `from`, `date`, `create_time`) values (%s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, [data['id'], data['title'], data['content'], data['from'], data['date'], time.time()])
+        else:
+            sql = "update `szu_news` set `title`=%s, `content`=%s, `from`=%s, `date`=%s where `view_id`=%s"
+            cursor.execute(sql, [data['title'], data['content'], data['from'], data['date'], data['id']])
+        conn.commit()
+        cursor.close()
+        conn.close()
 
