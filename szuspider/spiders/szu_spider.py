@@ -2,7 +2,6 @@ import scrapy
 import json
 import mysql.connector
 import time
-import sys
 import re
 
 class SzuSpider(scrapy.Spider):
@@ -51,7 +50,7 @@ class SzuSpider(scrapy.Spider):
             save_data['title'] = response.css("b font[size='4'] font::text").extract_first()
         if save_data['title'] is None or save_data['title'] == '':
             save_data['title'] = response.css("b font[size='4'] b font::text").extract_first()
-        save_data['content'] = response.css("table[width='85%']").extract_first()
+                
         temp = response.css("td[height='30'] font[color='#808080']::text").extract_first() #from 和 date 行
         save_data['from'] = temp.split('\u3000')[0] #拆分temp,得到from,date
         save_data['date'] = temp.split('\u3000')[1]
@@ -59,8 +58,8 @@ class SzuSpider(scrapy.Spider):
         save_data['click_in_content'] = response.css("td[height='40']::text").extract_first()
         save_data['click_in_content'] = re.findall(r"\d+\.?\d*", save_data['click_in_content'])[-1]
 
-        #过滤html标签
-        temp_data = save_data['content']
+        #过滤 content 的 html 标签
+        save_data['content'] = response.css("table[width='85%'] tr").extract()[2]
         dr = re.compile(r'<[^>]+>',re.S)
         save_data['content'] = dr.sub('',save_data['content']).replace("\r\n", "")
 
@@ -68,7 +67,7 @@ class SzuSpider(scrapy.Spider):
         self.EncodingJson(json_file_name, save_data) #转换为json格式保存本地文件
         self.log('Saved json file %s' % json_file_name)
 
-        save_data['content'] = temp_data
+        save_data['content'] = response.css("table[width='85%']").extract_first()
         self.szu_news_to_db(save_data) #数据入库
 
     @staticmethod
