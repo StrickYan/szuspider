@@ -59,7 +59,7 @@ class SzuSpider(scrapy.Spider):
         #过滤html标签
         temp_data = save_data['content']
         dr = re.compile(r'<[^>]+>',re.S)
-        save_data['content'] = dr.sub('',save_data['content']).replace("\r\n", " ")
+        save_data['content'] = dr.sub('',save_data['content']).replace("\r\n", "")
 
         json_file_name = self.download_path + 'json/%s.json' % id
         self.EncodingJson(json_file_name, save_data) #转换为json格式保存本地文件
@@ -86,8 +86,8 @@ class SzuSpider(scrapy.Spider):
     
     @staticmethod
     def EncodingJson(file_name, data):
-        out_json_file = open(file_name,"w")
-        json_data = json.dumps(data, sort_keys = True) 
+        out_json_file = open(file_name,"w", encoding="utf-8")
+        json_data = json.dumps(data, sort_keys = True, ensure_ascii=False)
         out_json_file.truncate()
         out_json_file.write(json_data)
         out_json_file.close()
