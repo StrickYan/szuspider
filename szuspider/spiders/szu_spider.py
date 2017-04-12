@@ -2,6 +2,8 @@ import scrapy
 import json
 import mysql.connector
 import time
+import sys
+import re
 
 class SzuSpider(scrapy.Spider):
     name = "szu"
@@ -40,7 +42,7 @@ class SzuSpider(scrapy.Spider):
         self.log('Saved html file %s' % html_file_name)
 
         #根据html规则拆取数据
-        save_data = {} 
+        save_data = {}
         save_data['id'] = id
         save_data['title'] = response.css("b font[size='4']::text").extract_first().replace("\u3000","")
         if save_data['title'] is None or save_data['title'] == '':
@@ -54,10 +56,16 @@ class SzuSpider(scrapy.Spider):
         save_data['from'] = temp.split('\u3000')[0] #拆分temp,得到from,date
         save_data['date'] = temp.split('\u3000')[1]
 
+        #过滤html标签
+        temp_data = save_data['content']
+        dr = re.compile(r'<[^>]+>',re.S)
+        save_data['content'] = dr.sub('',save_data['content']).replace("\r\n", "")
+
         json_file_name = self.download_path + 'json/%s.json' % id
         self.EncodingJson(json_file_name, save_data) #转换为json格式保存本地文件
         self.log('Saved json file %s' % json_file_name)
 
+        save_data['content'] = temp_data
         self.szu_news_to_db(save_data) #数据入库
 
     @staticmethod
@@ -78,8 +86,8 @@ class SzuSpider(scrapy.Spider):
     
     @staticmethod
     def EncodingJson(file_name, data):
-        out_json_file = open(file_name,"w")
-        json_data = json.dumps(data, sort_keys = True) 
+        out_json_file = open(file_name,"w", encoding="utf-8")
+        json_data = json.dumps(data, sort_keys = True, ensure_ascii=False)
         out_json_file.truncate()
         out_json_file.write(json_data)
         out_json_file.close()
