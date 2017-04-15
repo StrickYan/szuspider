@@ -17,6 +17,7 @@ NEWSPIDER_MODULE = 'szuspider.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'szuspider (+http://www.yourdomain.com)'
+#USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
