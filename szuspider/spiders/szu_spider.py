@@ -55,6 +55,11 @@ class SzuSpider(scrapy.Spider):
         temp = response.css("td[height='30'] font[color='#808080']::text").extract_first() #from 和 date 行
         save_data['from'] = temp.split('\u3000')[0] #拆分temp,得到from,date
         save_data['date'] = temp.split('\u3000')[1]
+        
+        #将日期转为双位数字存储
+        save_data['date'] = time.mktime(time.strptime(save_data['date'],'%Y-%m-%d %H:%M:%S'))
+        save_data['date'] = time.localtime(save_data['date'])
+        save_data['date'] = time.strftime('%Y-%m-%d %H:%M:%S',save_data['date'])
 
         save_data['click_in_content'] = response.css("td[height='40']::text").extract_first()
         save_data['click_in_content'] = re.findall(r"\d+\.?\d*", save_data['click_in_content'])[-1]
