@@ -10,7 +10,7 @@ class SzuSpider(scrapy.Spider):
 
     def start_requests(self):
         urls = [
-            'http://www.szu.edu.cn/board/',
+            'http://www1.szu.edu.cn/board/',
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)

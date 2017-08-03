@@ -16,7 +16,7 @@ class SzuFromDBSpider(scrapy.Spider):
         cursor.execute(sql)
         rets = cursor.fetchall()
         for ret in rets:
-            url = "http://www.szu.edu.cn/board/view.asp?id=" + str(ret[0])
+            url = "http://www1.szu.edu.cn/board/view.asp?id=" + str(ret[0])
             #print(url)
             urls.append(url)       
         #print(urls)
