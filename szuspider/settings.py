@@ -99,7 +99,9 @@ DOWNLOAD_DELAY = 1
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-DOWNLOADER_MIDDLEWARES = {
-    'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 110,
-    'szuspider.middlewares.ProxyMiddleware': 100,
-}
+
+# 下面一段为设置代理 本来开注释可用 不过由于学校在17年6月底更换了代理方式 所以原来的代理已经失效
+#DOWNLOADER_MIDDLEWARES = {
+#    'scrapy.contrib.downloadermiddleware.httpproxy.HttpProxyMiddleware': 110,
+#    'szuspider.middlewares.ProxyMiddleware': 100,
+#}
