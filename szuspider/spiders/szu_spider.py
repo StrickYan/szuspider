@@ -15,7 +15,23 @@ class SzuSpider(scrapy.Spider):
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
+    # 也可以注释上面的 start_requests 方法，采用下面这一句的写法，效果是一样的
+    #start_urls = ['http://www1.szu.edu.cn/board/']
+
     def parse(self, response):
+        return scrapy.FormRequest.from_response(
+            response,
+            formdata={'username': '123836', 'password': '074536'}, # 模拟登录
+            callback=self.after_login
+        )
+
+    def after_login(self, response):
+        # check login succeed before going on
+        if b"authentication failed" in response.body:
+            self.logger.error("Login failed")
+            return
+
+        # continue scraping with authenticated session...
         page = response.url.split("/")[-2]
         filename = self.download_path + 'html/%s.html' % page
         with open(filename, 'wb') as f:
