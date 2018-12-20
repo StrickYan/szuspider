@@ -11,3 +11,6 @@
 # 每隔一个小时更新索引
 00 * * * * source ~/.bash_profile; curl http://localhost:8080/ins/createIndex > /tmp/szunews/logs/logs-create-index/`/bin/date "+\%Y-\%m-\%d~\%H:\%M:\%S"`.log
 ```
+
+## 捐赠
+  <img src="https://raw.githubusercontent.com/StrickYan/sixchat/master/md_img/IMG_0238.jpg" width="400px" />
