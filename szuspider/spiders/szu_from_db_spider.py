@@ -58,7 +58,7 @@ class SzuFromDBSpider(scrapy.Spider):
         save_data['click_in_content'] = re.findall(r"\d+\.?\d*", save_data['click_in_content'])[-1]
 
         #过滤 content 的 html 标签
-        save_data['content'] = response.css("table[width='85%'] tr").extract()[2]
+        save_data['content'] = response.css("table[width='86%'] tr").extract()[2]
         dr = re.compile(r'<[^>]+>',re.S)
         save_data['content'] = dr.sub('',save_data['content']).replace("\r\n", "")
         save_data['content'] = ' '.join(save_data['content'].split())
@@ -72,7 +72,7 @@ class SzuFromDBSpider(scrapy.Spider):
         self.EncodingJson(json_file_name, save_data) #转换为json格式保存本地文件
         self.log('Saved json file %s' % json_file_name)
 
-        save_data['content'] = response.css("table[width='85%']").extract_first().replace("85%", "100%")
+        save_data['content'] = response.css("table[width='86%']").extract_first().replace("86%", "100%")
         self.szu_news_to_db(save_data) #数据入库
 
     @staticmethod
